@@ -1,11 +1,11 @@
 import { AboutData, ExperienceItem, ProjectItem, SkillCategory, ContactFormData } from '../types';
 import { fallbackAboutData, fallbackExperienceData, fallbackProjectsData, fallbackSkillsData } from './data';
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://localhost:5000';
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export async function fetchAbout(): Promise<AboutData> {
   try {
-    const res = await fetch(`http://localhost:5000/api/about`);
+    const res = await fetch(`${BASE_URL}/api/about`);
     if (!res.ok) throw new Error('Failed to fetch about data');
     return await res.json();
   } catch (error) {
@@ -41,6 +41,9 @@ export async function fetchSkills(): Promise<SkillCategory[]> {
     const res = await fetch(`${BASE_URL}/api/skills`, { cache: 'no-store' });
     if (!res.ok) throw new Error('Failed to fetch skills data');
     const data = await res.json();
+    if (Array.isArray(data)) {
+      return data as SkillCategory[];
+    }
     return data.categories || fallbackSkillsData;
   } catch (error) {
     console.warn('API fetchSkills failed, using fallback data:', error);

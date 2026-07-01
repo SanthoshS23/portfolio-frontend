@@ -11,12 +11,12 @@ import { Sparkles, X, Send, Bot, User, MessageSquare } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChatMessage } from '../types';
 
-const SYSTEM_MESSAGE = "You are an AI assistant for Santhosh S's portfolio. Santhosh is a Software Developer with 2+ years of experience. He works at Syncfusion as Software Developer III since Feb 2024 in Chennai. He builds scalable UI components using Next.js, Angular, TypeScript. He built BoldAI Agent (Next.js, REST API, embeddable JS widget, AI versioning) and BoldChat (Angular, WebSocket, real-time chat). He studied B.E. Computer Science at Nandha College of Technology (CGPA 8.1, 2019-2023). He lives in Erode, Tamil Nadu. Email: santhoshpy0209@gmail.com. LinkedIn: linkedin.com/in/santhosh-s-8700421b9. Keep answers concise, friendly and professional.";
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
 export default function AIWidget() {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([
-    { role: 'assistant', content: 'Hi there! I am Santhosh\'s portfolio assistant. Ask me anything about his skills, experience, or projects!' },
+    { role: 'assistant', content: 'Hi there!' },
   ]);
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -30,60 +30,115 @@ export default function AIWidget() {
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
+
     if (!inputValue.trim()) return;
 
-    const userMessage: ChatMessage = { role: 'user', content: inputValue.trim() };
+    const userMessage: ChatMessage = {
+      role: 'user',
+      content: inputValue.trim(),
+    };
+
     setMessages((prev) => [...prev, userMessage]);
+
     setInputValue('');
     setIsTyping(true);
 
     try {
-      // OpenRouter Key from env
-      const apiKey = process.env.NEXT_PUBLIC_OPENROUTER_KEY;
-      if (!apiKey || apiKey === 'your_openrouter_key_here') {
-        throw new Error('API key is not configured');
-      }
-
-      // Limit history to last 6 messages
-      const history = messages.slice(-6).map((msg) => ({
-        role: msg.role,
-        content: msg.content,
-      }));
-
-      // Append latest message
-      history.push({ role: 'user', content: userMessage.content });
-
-      // Call OpenRouter
-      const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiKey}`,
-          'HTTP-Referer': typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000',
-          'X-Title': 'Santhosh Portfolio',
-        },
-        body: JSON.stringify({
-          model: 'mistralai/mistral-7b-instruct:free',
-          messages: [
-            { role: 'system', content: SYSTEM_MESSAGE },
-            ...history,
-          ],
-        }),
-      });
+      const response = await fetch(
+        `${BASE_URL}/api/chat/stream`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            message: userMessage.content,
+          }),
+        }
+      );
 
       if (!response.ok) {
-        throw new Error('OpenRouter API request failed');
+        throw new Error(`Request failed: ${response.status}`);
       }
 
-      const responseData = await response.json();
-      const assistantReply = responseData?.choices?.[0]?.message?.content || 'I could not process that answer.';
-      
-      setMessages((prev) => [...prev, { role: 'assistant', content: assistantReply }]);
-    } catch (error) {
-      console.error('AI Widget Error:', error);
+      if (!response.body) {
+        throw new Error('No response stream found');
+      }
+
+      let assistantMessage = '';
+
+      // Create empty assistant message
       setMessages((prev) => [
         ...prev,
-        { role: 'assistant', content: "Sorry, I couldn't connect. Try again." },
+        {
+          role: 'assistant',
+          content: '',
+        },
+      ]);
+
+      // Hide typing dots once streaming starts
+      setIsTyping(false);
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+
+      let buffer = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+
+        if (done) {
+          break;
+        }
+
+        buffer += decoder.decode(value, {
+          stream: true,
+        });
+
+        const events = buffer.split('\n\n');
+
+        buffer = events.pop() || '';
+
+        for (const event of events) {
+          if (!event.startsWith('data:')) {
+            continue;
+          }
+
+          const text = event
+            .replace('data:', '')
+            .trim();
+
+          if (
+            !text ||
+            text === 'completed'
+          ) {
+            continue;
+          }
+
+          assistantMessage += text;
+
+          setMessages((prev) => {
+            const updated = [...prev];
+
+            updated[updated.length - 1] = {
+              role: 'assistant',
+              content: assistantMessage,
+            };
+
+            return updated;
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Chat Error:', error);
+
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: 'assistant',
+          content:
+            'Sorry, something went wrong. Please try again.',
+        },
       ]);
     } finally {
       setIsTyping(false);
@@ -121,7 +176,7 @@ export default function AIWidget() {
                   <Bot className="w-5 h-5" />
                 </div>
                 <div>
-                  <h4 className="text-sm font-bold text-white">Ask about Santhosh</h4>
+                  <h4 className="text-sm font-bold text-white">AI Bot</h4>
                   <span className="text-[10px] text-emerald-400 flex items-center gap-1 font-semibold">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping inline-block" />
                     Online
@@ -187,7 +242,7 @@ export default function AIWidget() {
                 type="text"
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
-                placeholder="Ask about his projects..."
+                placeholder="Tell me your queries..."
                 className="flex-1 bg-slate-900/60 border border-white/5 rounded-xl px-4 py-2 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500/50"
               />
               <button

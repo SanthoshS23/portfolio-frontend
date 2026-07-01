@@ -11,7 +11,16 @@ import { motion } from 'framer-motion';
 
 // Custom SVG component for Linkedin logo since brand icons are removed from newer lucide versions
 const Linkedin = (props: React.SVGProps<SVGSVGElement>) => (
-  <svg viewBox="0 0 444 444" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={2}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    {...props}
+  >
     <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
     <rect x="2" y="9" width="4" height="12" />
     <circle cx="4" cy="4" r="2" />
@@ -110,7 +119,7 @@ export default function About() {
                 rel="noopener noreferrer"
                 className="flex items-center gap-3 text-slate-400 hover:text-white transition-colors duration-200 text-sm font-semibold"
               >
-                <Phone className="w-4 h-4 text-purple-400 shrink-0" />
+                <Linkedin className="w-4 h-4 text-purple-400 shrink-0" />
                 <span>LinkedIn Profile</span>
               </a>
             </div>
