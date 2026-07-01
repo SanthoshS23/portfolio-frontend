@@ -31,25 +31,47 @@ export default function SkillsSection({ previewOnly = false }: SkillsSectionProp
     );
   }
 
+  const normalizedCategories = categories.map((category) => ({
+    name: category.name || 'Unknown Category',
+    skills: Array.isArray(category.skills) ? category.skills : [],
+  }));
+
   // For the homepage mini preview, we only show 6 badges of primary skills
   if (previewOnly) {
-    const allSkills = categories.flatMap(cat => cat.skills).slice(0, 6);
     return (
-      <div className="w-full max-w-3xl mx-auto text-center mt-12 px-4">
-        <h2 className="text-xl font-semibold text-slate-300 mb-6 tracking-wide">Core Technologies</h2>
-        <div className="flex flex-wrap justify-center gap-3">
-          {allSkills.map((skill, idx) => (
-            <motion.span
-              key={skill}
-              initial={{ opacity: 0, scale: 0.8 }}
-              whileInView={{ opacity: 1, scale: 1 }}
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12">
+        <div className="text-center mb-10">
+          <h2 className="text-lg uppercase tracking-[0.3em] text-indigo-300 mb-3">Core Technologies</h2>
+        </div>
+
+        <div className="grid gap-6 lg:grid-cols-3">
+          {normalizedCategories.map((category, catIdx) => (
+            <motion.div
+              key={`${category.name}-${catIdx}`}
+              initial={{ opacity: 0, y: 25 }}
+              whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.4, delay: idx * 0.05 }}
-              whileHover={{ scale: 1.08 }}
-              className="px-5 py-2.5 rounded-xl text-sm font-medium bg-slate-900/60 border border-white/10 hover:border-indigo-500/40 text-slate-200 hover:text-indigo-400 hover:shadow-[0_0_15px_rgba(99,102,241,0.2)] transition-all duration-300 cursor-default"
+              transition={{ duration: 0.45, delay: catIdx * 0.08 }}
+              className="glass-panel p-6 rounded-3xl border border-white/10"
             >
-              {skill}
-            </motion.span>
+              <h3 className="text-lg font-semibold text-white mb-4">{category.name}</h3>
+              <div className="flex flex-wrap gap-2">
+                {category.skills.length > 0 ? (
+                  category.skills.map((skill) => (
+                    <span
+                      key={skill}
+                      className="px-4 py-2 rounded-2xl bg-slate-950/70 border border-white/10 text-sm text-slate-200"
+                    >
+                      {skill}
+                    </span>
+                  ))
+                ) : (
+                  <span className="px-4 py-2 rounded-2xl bg-slate-950/70 border border-white/10 text-sm text-slate-400">
+                    No skills available
+                  </span>
+                )}
+              </div>
+            </motion.div>
           ))}
         </div>
       </div>
@@ -65,9 +87,9 @@ export default function SkillsSection({ previewOnly = false }: SkillsSectionProp
   return (
     <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        {categories.map((category, catIdx) => (
+        {normalizedCategories.map((category, catIdx) => (
           <motion.div
-            key={category.name}
+            key={`${category.name}-${catIdx}`}
             initial={{ opacity: 0, y: 25 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -79,17 +101,23 @@ export default function SkillsSection({ previewOnly = false }: SkillsSectionProp
               <h3 className="text-lg font-bold text-white tracking-wide">{category.name}</h3>
             </div>
             
-            {/* Skills grid within category: 2 cols mobile, 3 cols tablet, 4 cols desktop - wait, here it's 2 cols inside the card */}
+            {/* Skills grid within category */}
             <div className="grid grid-cols-2 gap-3">
-              {category.skills.map((skill, skillIdx) => (
-                <motion.div
-                  key={skill}
-                  whileHover={{ x: 3 }}
-                  className="px-4 py-3 rounded-xl bg-slate-950/40 border border-white/5 text-sm text-slate-300 font-medium hover:text-white hover:border-indigo-500/20 hover:bg-slate-900/30 transition-all duration-200"
-                >
-                  {skill}
-                </motion.div>
-              ))}
+              {category.skills.length > 0 ? (
+                category.skills.map((skill) => (
+                  <motion.div
+                    key={skill}
+                    whileHover={{ x: 3 }}
+                    className="px-4 py-3 rounded-xl bg-slate-950/40 border border-white/5 text-sm text-slate-300 font-medium hover:text-white hover:border-indigo-500/20 hover:bg-slate-900/30 transition-all duration-200"
+                  >
+                    {skill}
+                  </motion.div>
+                ))
+              ) : (
+                <div className="col-span-2 px-4 py-3 rounded-xl bg-slate-950/40 border border-white/5 text-sm text-slate-400">
+                  Skills not available yet.
+                </div>
+              )}
             </div>
           </motion.div>
         ))}

@@ -6,10 +6,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowRight, Download, Code, Globe, Cpu, Layers } from 'lucide-react';
 
 const roles = [
+  'Frontend-Focused Full Stack Developer',
+  'Software Developer III',
   'Frontend Developer',
-  'React.js Engineer',
   'Next.js Developer',
-  'UI/UX Craftsman',
+  '.NET Core REST APIs',
 ];
 
 export default function HeroSection() {
@@ -42,7 +43,7 @@ export default function HeroSection() {
 
         {/* Angular Badge */}
         <motion.div
-          className="absolute top-1/3 right-[10%] sm:right-[15%] p-3 rounded-2xl glass-panel text-red-500 flex items-center gap-2"
+          className="absolute top-[26%] right-[12%] sm:right-[18%] p-3 rounded-2xl glass-panel text-red-500 flex items-center gap-2"
           animate={{ y: [0, 15, 0], rotate: [0, -5, 0] }}
           transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
         >
@@ -52,12 +53,22 @@ export default function HeroSection() {
 
         {/* Next.js Badge */}
         <motion.div
-          className="absolute bottom-1/4 left-[12%] sm:left-[20%] p-3 rounded-2xl glass-panel text-slate-100 flex items-center gap-2"
+          className="absolute bottom-[34%] left-[14%] sm:left-[20%] p-3 rounded-2xl glass-panel text-slate-100 flex items-center gap-2"
           animate={{ y: [0, 12, 0] }}
           transition={{ duration: 5.5, repeat: Infinity, ease: 'easeInOut', delay: 0.5 }}
         >
           <Layers className="w-5 h-5" />
           <span className="text-xs font-semibold hidden sm:inline">Next.js</span>
+        </motion.div>
+
+        {/* .NET Core REST APIs Badge */}
+        <motion.div
+          className="absolute top-[44%] right-[8%] sm:right-[14%] p-3 rounded-2xl glass-panel text-emerald-300 flex items-center gap-2"
+          animate={{ y: [0, -12, 0], rotate: [0, 3, 0] }}
+          transition={{ duration: 5.2, repeat: Infinity, ease: 'easeInOut', delay: 0.8 }}
+        >
+          <Code className="w-5 h-5" />
+          <span className="text-xs font-semibold hidden sm:inline">.NET Core REST APIs</span>
         </motion.div>
 
         {/* TypeScript Badge */}
@@ -147,7 +158,7 @@ export default function HeroSection() {
           {[
             { value: '2+', label: 'Years Experience' },
             { value: '2', label: 'Companies' },
-            { value: '10+', label: 'Projects' },
+            { value: '2+', label: 'Projects' },
             { value: '5+', label: 'Technologies' },
           ].map((stat, idx) => (
             <div key={idx} className="text-center p-3 sm:p-4 border-r last:border-0 border-white/5 md:border-r">
